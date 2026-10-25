@@ -1,0 +1,6 @@
+@SanTheThao.Api__HostAddress = http://localhost:5110
+
+GET {{SanTheThao.Api__HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

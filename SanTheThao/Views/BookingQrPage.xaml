@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             x:Class="SanTheThao.Views.BookingQrPage"
+             x:DataType="vm:BookingQrViewModel"
+             Title="Mã check-in">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="14">
+
+            <Border Padding="14">
+                <VerticalStackLayout Spacing="3">
+                    <Label Text="{Binding Booking.VenueName}" Style="{StaticResource SectionLabel}"
+                           HorizontalOptions="Center" />
+                    <Label Text="{Binding Booking.Date, StringFormat='📅 {0:dd/MM/yyyy}'}"
+                           Style="{StaticResource SubLabel}" HorizontalOptions="Center" />
+                    <Label Text="{Binding Booking.HoursText, StringFormat='🕒 {0}'}"
+                           Style="{StaticResource SubLabel}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Nền trắng để mã QR dễ quét -->
+            <Border BackgroundColor="White" Padding="16" HorizontalOptions="Center"
+                    StrokeShape="RoundRectangle 16">
+                <Image Source="{Binding QrImage}" WidthRequest="260" HeightRequest="260" />
+            </Border>
+
+            <VerticalStackLayout Spacing="2">
+                <Label Text="Mã đơn" Style="{StaticResource SubLabel}" HorizontalOptions="Center" />
+                <Label Text="{Binding Booking.Code}" FontSize="32" FontAttributes="Bold"
+                       TextColor="{StaticResource Green}" CharacterSpacing="4"
+                       HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <Border BackgroundColor="{StaticResource Accent}" StrokeThickness="0" Padding="14">
+                <Label Text="Khi đến sân, bạn đưa mã này cho nhân viên để check-in. Bạn có thể check-in sớm nhất 30 phút trước giờ chơi."
+                       Style="{StaticResource SubLabel}" HorizontalTextAlignment="Center" />
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

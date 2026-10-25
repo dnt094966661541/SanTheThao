@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             x:Class="SanTheThao.Views.VenueEditPage"
+             x:DataType="vm:VenueEditViewModel"
+             Title="{Binding PageTitle}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="6">
+
+            <Label Text="Ảnh sân" Style="{StaticResource SectionLabel}" />
+            <Border HeightRequest="180" Padding="0" StrokeShape="RoundRectangle 14"
+                    BackgroundColor="{StaticResource Accent}">
+                <Grid>
+                    <VerticalStackLayout VerticalOptions="Center" Spacing="6" IsVisible="{Binding HasNoPhoto}">
+                        <Label Text="📷" FontSize="40" HorizontalOptions="Center" />
+                        <Label Text="Chưa có ảnh" Style="{StaticResource SubLabel}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                    <Image Source="{Binding PhotoSource}" Aspect="AspectFill" IsVisible="{Binding HasPhoto}" />
+                </Grid>
+            </Border>
+            <Button Text="Chọn ảnh từ thư viện" Style="{StaticResource OutlineButton}"
+                    Command="{Binding PickPhotoCommand}" Margin="0,4,0,12" />
+
+            <Label Text="Thông tin sân" Style="{StaticResource SectionLabel}" />
+
+            <Label Text="Tên sân" FontAttributes="Bold" Margin="0,6,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding Name}" Placeholder="Ví dụ: Sân cầu lông Thăng Long" />
+            </Border>
+
+            <Label Text="Môn thể thao" FontAttributes="Bold" Margin="0,6,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Picker ItemsSource="{Binding Sports}" SelectedItem="{Binding Sport}" />
+            </Border>
+
+            <Label Text="Địa chỉ" FontAttributes="Bold" Margin="0,6,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding Address}" />
+            </Border>
+
+            <Label Text="Khu vực (quận, huyện)" FontAttributes="Bold" Margin="0,6,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding District}" />
+            </Border>
+
+            <Label Text="Bảng giá (đồng/giờ)" Style="{StaticResource SectionLabel}" Margin="0,16,0,0" />
+
+            <Label Text="Giá thường" FontAttributes="Bold" Margin="0,6,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding PriceText}" Keyboard="Numeric" />
+            </Border>
+
+            <Label Text="Giá giờ cao điểm (0 = không dùng)" Margin="0,6,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding PeakPriceText}" Keyboard="Numeric" />
+            </Border>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,6,0,0">
+                <VerticalStackLayout Grid.Column="0" Spacing="6">
+                    <Label Text="Cao điểm từ (giờ)" />
+                    <Border Style="{StaticResource InputBox}">
+                        <Entry Text="{Binding PeakStartText}" Keyboard="Numeric" />
+                    </Border>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                    <Label Text="Đến trước (giờ)" />
+                    <Border Style="{StaticResource InputBox}">
+                        <Entry Text="{Binding PeakEndText}" Keyboard="Numeric" />
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label Text="Giá cuối tuần (0 = không dùng)" Margin="0,6,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding WeekendPriceText}" Keyboard="Numeric" />
+            </Border>
+
+            <Label Text="{Binding ErrorText}" TextColor="{StaticResource Danger}" FontSize="13" />
+
+            <Button Text="Lưu sân" Command="{Binding SaveCommand}" Margin="0,8,0,16" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

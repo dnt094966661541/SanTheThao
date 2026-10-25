@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             x:Class="SanTheThao.Views.OwnerApplyPage"
+             x:DataType="vm:OwnerApplyViewModel"
+             Title="Đăng ký làm chủ sân">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="6">
+
+            <Border BackgroundColor="{StaticResource Accent}" StrokeThickness="0" Padding="14">
+                <Label Text="Gửi thông tin cơ sở của bạn. Quản trị viên sẽ xem và duyệt, bạn theo dõi kết quả ở tab Tài khoản."
+                       Style="{StaticResource SubLabel}" />
+            </Border>
+
+            <Label Text="Tên cơ sở kinh doanh" FontAttributes="Bold" Margin="0,10,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding BusinessName}" Placeholder="Ví dụ: Cụm sân cầu lông Thăng Long" />
+            </Border>
+
+            <Label Text="Số điện thoại liên hệ" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding Phone}" Keyboard="Telephone" />
+            </Border>
+
+            <Label Text="Địa chỉ cơ sở" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding Address}" />
+            </Border>
+
+            <Label Text="Ghi chú (không bắt buộc)" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Padding="12,4" HeightRequest="110">
+                <Editor Text="{Binding Note}"
+                        Placeholder="Số lượng sân, các môn, giấy phép kinh doanh..." />
+            </Border>
+
+            <Label Text="{Binding ErrorText}" TextColor="{StaticResource Danger}" FontSize="13" />
+
+            <Button Text="Gửi hồ sơ" Command="{Binding SubmitCommand}" Margin="0,8,0,16" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

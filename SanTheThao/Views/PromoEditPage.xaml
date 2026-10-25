@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             x:Class="SanTheThao.Views.PromoEditPage"
+             x:DataType="vm:PromoEditViewModel"
+             Title="Tạo mã giảm giá">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="6">
+
+            <Label Text="Mã (chữ không dấu và số)" FontAttributes="Bold" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding Code}" Placeholder="Ví dụ: TET15" />
+            </Border>
+
+            <Label Text="Áp dụng cho" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Picker ItemsSource="{Binding VenueNames}" SelectedIndex="{Binding VenueIndex}" />
+            </Border>
+
+            <Label Text="Giảm bao nhiêu phần trăm" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding PercentText}" Keyboard="Numeric" />
+            </Border>
+
+            <Label Text="Giảm tối đa (đồng, 0 = không giới hạn)" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding MaxDiscountText}" Keyboard="Numeric" />
+            </Border>
+
+            <Label Text="Đơn tối thiểu (đồng, 0 = không yêu cầu)" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding MinTotalText}" Keyboard="Numeric" />
+            </Border>
+
+            <Label Text="Số lượt dùng tối đa (0 = không giới hạn)" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding UsageLimitText}" Keyboard="Numeric" />
+            </Border>
+
+            <Label Text="Dùng được từ ngày" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <DatePicker Date="{Binding ValidFrom}" Format="dd/MM/yyyy" />
+            </Border>
+
+            <Label Text="Đến hết ngày" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <DatePicker Date="{Binding ValidTo}" Format="dd/MM/yyyy" />
+            </Border>
+
+            <Label Text="{Binding ErrorText}" TextColor="{StaticResource Danger}" FontSize="13" />
+
+            <Button Text="Lưu mã" Command="{Binding SaveCommand}" Margin="0,8,0,16" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

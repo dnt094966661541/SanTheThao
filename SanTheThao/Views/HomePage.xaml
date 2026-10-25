@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             xmlns:models="clr-namespace:SanTheThao.Models"
+             xmlns:controls="clr-namespace:SanTheThao.Controls"
+             x:Class="SanTheThao.Views.HomePage"
+             x:DataType="vm:HomeViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Thanh xanh phía trên -->
+        <Grid Grid.Row="0" BackgroundColor="{StaticResource Green}"
+              Padding="16,24,16,16" RowDefinitions="Auto,Auto" RowSpacing="12">
+            <Label Text="{Binding GreetingText}" TextColor="White" FontSize="22" FontAttributes="Bold" />
+            <Border Grid.Row="1" Style="{StaticResource InputBox}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <Label Text="🔍" VerticalOptions="Center" />
+                    <Entry Grid.Column="1" Placeholder="Tìm tên sân hoặc khu vực..."
+                           Text="{Binding SearchText}" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <RefreshView Grid.Row="1" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Venues}" Margin="16,0">
+
+                <CollectionView.Header>
+                    <VerticalStackLayout x:DataType="vm:HomeViewModel" Spacing="14" Padding="0,14,0,8">
+
+                        <!-- Banner -->
+                        <Border StrokeThickness="0" Padding="20" StrokeShape="RoundRectangle 16">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#1B8A3A" Offset="0" />
+                                    <GradientStop Color="#34B35A" Offset="1" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Sân đẹp" TextColor="White" FontSize="20" FontAttributes="Bold" />
+                                    <Label Text="Giá tốt" TextColor="White" FontSize="20" FontAttributes="Bold" />
+                                    <Label Text="Đặt ngay!" TextColor="#FFE9A6" FontSize="20" FontAttributes="Bold" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1" Text="⚽🏸" FontSize="40" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Môn thể thao -->
+                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                            <HorizontalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Chips}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:SportChip">
+                                        <VerticalStackLayout Spacing="4" WidthRequest="72">
+                                            <Border WidthRequest="58" HeightRequest="58" Padding="0"
+                                                    StrokeThickness="0" StrokeShape="Ellipse"
+                                                    BackgroundColor="{StaticResource Accent}"
+                                                    HorizontalOptions="Center">
+                                                <Label Text="{Binding Icon}" FontSize="26"
+                                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="{StaticResource Green}" />
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                            </Border>
+                                            <Label Text="{Binding Name}" FontSize="12" HorizontalOptions="Center" />
+                                            <VerticalStackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=SelectSportCommand}"
+                                                    CommandParameter="{Binding Name}" />
+                                            </VerticalStackLayout.GestureRecognizers>
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
+                        </ScrollView>
+
+                        <!-- Tiêu đề, sắp xếp, yêu thích -->
+                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+                            <Label Text="Sân nổi bật" Style="{StaticResource SectionLabel}" VerticalOptions="Center" />
+                            <Picker Grid.Column="1" Title="Sắp xếp" WidthRequest="150"
+                                    ItemsSource="{Binding SortOptions}" SelectedItem="{Binding SelectedSort}" />
+                            <Label Grid.Column="2" Text="❤️" VerticalOptions="Center" />
+                            <Switch Grid.Column="3" IsToggled="{Binding OnlyFavorites}"
+                                    OnColor="{StaticResource Green}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </CollectionView.Header>
+
+                <CollectionView.EmptyView>
+                    <Label Text="Không tìm thấy sân phù hợp." Style="{StaticResource SubLabel}"
+                           HorizontalOptions="Center" Margin="0,40" />
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Venue">
+                        <Border Margin="0,0,0,12" Padding="12">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <controls:VenuePhoto ImageUrl="{Binding FullImageUrl}" Icon="{Binding Icon}"
+                                                     WidthRequest="84" HeightRequest="84" VerticalOptions="Start" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="16"
+                                           LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding District, StringFormat='📍 {0}'}"
+                                           Style="{StaticResource SubLabel}" />
+                                    <Label Text="{Binding PricePerHour, StringFormat='{0:N0} đ/giờ'}"
+                                           Style="{StaticResource PriceLabel}" />
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Label FontSize="13" VerticalOptions="Center">
+                                            <Label.Text>
+                                                <MultiBinding StringFormat="⭐ {0} ({1})">
+                                                    <Binding Path="Rating" />
+                                                    <Binding Path="ReviewCount" />
+                                                </MultiBinding>
+                                            </Label.Text>
+                                        </Label>
+                                        <Border Style="{StaticResource Badge}">
+                                            <Label Text="{Binding Sport}" FontSize="11"
+                                                   TextColor="{StaticResource Green}" />
+                                        </Border>
+                                        <Label Text="❤️" IsVisible="{Binding IsFavorite}" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, Path=OpenVenueCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

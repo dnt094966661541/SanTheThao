@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="456" height="456" viewBox="0 0 456 456" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<circle cx="228" cy="228" r="120" fill="white"/>
+	<polygon points="228,160 293,207 268,283 188,283 163,207" fill="#1B8A3A"/>
+	<path d="M228 160 L228 108 M293 207 L343 190 M268 283 L300 330 M188 283 L156 330 M163 207 L113 190"
+		  stroke="#1B8A3A" stroke-width="10" stroke-linecap="round"/>
+</svg>

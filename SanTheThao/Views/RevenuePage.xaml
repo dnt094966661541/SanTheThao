@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             xmlns:models="clr-namespace:SanTheThao.Models"
+             x:Class="SanTheThao.Views.RevenuePage"
+             x:DataType="vm:RevenueViewModel"
+             Title="Doanh thu">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16" RowSpacing="12">
+
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+            <Button Grid.Column="0" Text="◀" Style="{StaticResource SmallButton}"
+                    WidthRequest="52" Command="{Binding PrevCommand}" />
+            <Label Grid.Column="1" Text="{Binding MonthText}" Style="{StaticResource SectionLabel}"
+                   HorizontalOptions="Center" VerticalOptions="Center" />
+            <Button Grid.Column="2" Text="▶" Style="{StaticResource SmallButton}"
+                    WidthRequest="52" Command="{Binding NextCommand}" />
+        </Grid>
+
+        <Border Grid.Row="1" Padding="18" StrokeThickness="0"
+                BackgroundColor="{StaticResource Green}">
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Tổng doanh thu" TextColor="#DDF2E3" FontSize="13" />
+                <Label Text="{Binding TotalText}" TextColor="White" FontSize="28" FontAttributes="Bold" />
+                <Label Text="{Binding CountText}" TextColor="#DDF2E3" FontSize="13" />
+            </VerticalStackLayout>
+        </Border>
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Days}">
+            <CollectionView.Header>
+                <Label Text="Theo ngày" Style="{StaticResource SectionLabel}" Margin="0,4,0,8" />
+            </CollectionView.Header>
+            <CollectionView.EmptyView>
+                <Label Text="Tháng này chưa có doanh thu." Style="{StaticResource SubLabel}"
+                       HorizontalOptions="Center" Margin="0,30" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:RevenueDay">
+                    <Border Margin="0,0,0,8" Padding="12">
+                        <VerticalStackLayout Spacing="6">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="{Binding DayText}" FontAttributes="Bold" />
+                                <Label Grid.Column="1" Text="{Binding TotalText}"
+                                       Style="{StaticResource PriceLabel}" />
+                            </Grid>
+                            <ProgressBar Progress="{Binding Ratio}"
+                                         ProgressColor="{StaticResource Green}" />
+                            <Label Text="{Binding CountText}" Style="{StaticResource SubLabel}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

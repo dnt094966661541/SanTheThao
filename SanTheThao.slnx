@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="SanTheThao.Api/SanTheThao.Api.csproj" />
+  <Project Path="SanTheThao/SanTheThao.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>

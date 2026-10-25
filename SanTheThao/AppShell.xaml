@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="SanTheThao.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:SanTheThao"
+    xmlns:views="clr-namespace:SanTheThao.Views"
+    FlyoutBehavior="Disabled"
+    Shell.TabBarForegroundColor="#1B8A3A"
+    Shell.TabBarTitleColor="#1B8A3A"
+    Shell.BackgroundColor="White"
+    Shell.ForegroundColor="#1B8A3A"
+    Shell.TitleColor="#222222"
+    Shell.TabBarBackgroundColor="White"
+    Shell.TabBarUnselectedColor="#9CA3AF"
+    Title="SanTheThao">
+
+    <ShellContent
+        Title="Đăng nhập"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="LoginPage" />
+
+    <TabBar>
+        <ShellContent
+            Title="Trang chủ"
+            ContentTemplate="{DataTemplate views:HomePage}"
+            Route="HomePage">
+            <ShellContent.Icon>
+                <FontImageSource Glyph="🏠" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <ShellContent
+            Title="Lịch sử"
+            ContentTemplate="{DataTemplate views:HistoryPage}"
+            Route="HistoryPage">
+            <ShellContent.Icon>
+                <FontImageSource Glyph="📋" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <ShellContent
+            Title="Tài khoản"
+            ContentTemplate="{DataTemplate views:ProfilePage}"
+            Route="ProfilePage">
+            <ShellContent.Icon>
+                <FontImageSource Glyph="👤" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <ShellContent
+            x:Name="OwnerTab"
+            Title="Quản lý"
+            IsVisible="False"
+            ContentTemplate="{DataTemplate views:OwnerHomePage}"
+            Route="OwnerHomePage">
+            <ShellContent.Icon>
+                <FontImageSource Glyph="🏟️" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <ShellContent
+            x:Name="AdminTab"
+            Title="Quản trị"
+            IsVisible="False"
+            ContentTemplate="{DataTemplate views:AdminPage}"
+            Route="AdminPage">
+            <ShellContent.Icon>
+                <FontImageSource Glyph="🛡️" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+    </TabBar>
+
+</Shell>

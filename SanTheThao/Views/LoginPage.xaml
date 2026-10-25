@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             x:Class="SanTheThao.Views.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             BackgroundColor="White"
+             Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="28,56,28,24" Spacing="14">
+
+            <Label Text="⚽" FontSize="72" HorizontalOptions="Center" />
+            <Label Text="SânThểThao" FontSize="30" FontAttributes="Bold"
+                   TextColor="{StaticResource Green}" HorizontalOptions="Center" />
+            <Label Text="{Binding TitleText}" Style="{StaticResource SubLabel}" FontSize="15"
+                   HorizontalOptions="Center" Margin="0,0,0,16" />
+
+            <Border Style="{StaticResource InputBox}" IsVisible="{Binding IsRegister}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <Label Text="👤" VerticalOptions="Center" />
+                    <Entry Grid.Column="1" Placeholder="Họ và tên" Text="{Binding FullName}" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource InputBox}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <Label Text="✉️" VerticalOptions="Center" />
+                    <Entry Grid.Column="1" Placeholder="Email" Keyboard="Email" Text="{Binding Email}" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource InputBox}">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <Label Text="🔒" VerticalOptions="Center" />
+                    <Entry Grid.Column="1" Placeholder="Mật khẩu"
+                           IsPassword="{Binding HidePassword}" Text="{Binding Password}" />
+                    <Label Grid.Column="2" Text="{Binding EyeText}" FontSize="18" VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding TogglePasswordCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </Border>
+
+            <Label Text="{Binding ErrorText}" TextColor="{StaticResource Danger}" FontSize="13" />
+
+            <Button Text="{Binding SubmitText}"
+                    Command="{Binding SubmitCommand}"
+                    IsEnabled="{Binding IsNotBusy}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource Green}" />
+
+            <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="12" Margin="0,8">
+                <BoxView Grid.Column="0" HeightRequest="1" Color="#E5E7EB" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="Hoặc" Style="{StaticResource SubLabel}" />
+                <BoxView Grid.Column="2" HeightRequest="1" Color="#E5E7EB" VerticalOptions="Center" />
+            </Grid>
+
+            <Button Text="{Binding SwitchText}"
+                    Style="{StaticResource OutlineButton}"
+                    Command="{Binding ToggleModeCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

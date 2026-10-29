@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             xmlns:models="clr-namespace:SanTheThao.Models"
+             x:Class="SanTheThao.Views.ChatPage"
+             x:DataType="vm:ChatViewModel"
+             Title="{Binding TitleText}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <Label Grid.Row="0" Text="{Binding InfoText}" Style="{StaticResource SubLabel}"
+               HorizontalOptions="Center" Margin="0,8" />
+
+        <CollectionView x:Name="MessageList" Grid.Row="1" ItemsSource="{Binding Messages}" Margin="12,0">
+            <CollectionView.EmptyView>
+                <Label Text="Chưa có tin nhắn nào. Bạn hãy chào mọi người nhé!"
+                       Style="{StaticResource SubLabel}" HorizontalTextAlignment="Center" Margin="0,40" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ChatMessage">
+                    <Border Margin="0,4" Padding="12,8" MaximumWidthRequest="280"
+                            HorizontalOptions="{Binding Align}"
+                            BackgroundColor="{Binding BubbleColor}"
+                            StrokeShape="RoundRectangle 16">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding UserName}" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource Green}" IsVisible="{Binding ShowName}" />
+                            <Label Text="{Binding Text}" TextColor="{Binding TextColor}" FontSize="15" />
+                            <Label Text="{Binding TimeText}" TextColor="{Binding TimeColor}"
+                                   FontSize="10" HorizontalOptions="End" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Ô nhập tin nhắn -->
+        <Border Grid.Row="2" Padding="12,8" StrokeShape="RoundRectangle 0" IsVisible="{Binding CanSend}">
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{Binding ErrorText}" TextColor="{StaticResource Danger}" FontSize="12" />
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Border Style="{StaticResource InputBox}" HeightRequest="46">
+                        <Entry Text="{Binding Draft}" Placeholder="Nhập tin nhắn..." MaxLength="1000"
+                               ReturnCommand="{Binding SendCommand}" />
+                    </Border>
+                    <Button Grid.Column="1" Text="Gửi" HeightRequest="46" WidthRequest="80"
+                            Command="{Binding SendCommand}" />
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <Border Grid.Row="2" Padding="14" StrokeShape="RoundRectangle 0" IsVisible="{Binding CannotSend}">
+            <Label Text="Kèo đã đóng hoặc đã kết thúc nên không nhắn thêm được."
+                   Style="{StaticResource SubLabel}" HorizontalTextAlignment="Center" />
+        </Border>
+    </Grid>
+</ContentPage>

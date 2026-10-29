@@ -64,6 +64,24 @@
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
 
+                <!-- Lặp lại hằng tuần -->
+                <Border Padding="14" Margin="0,8,0,0">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout>
+                                <Label Text="Lặp lại hằng tuần" FontAttributes="Bold" />
+                                <Label Text="Giữ cùng thứ, cùng khung giờ" Style="{StaticResource SubLabel}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding RepeatWeekly}"
+                                    OnColor="{StaticResource Green}" />
+                        </Grid>
+                        <Border Style="{StaticResource InputBox}" IsVisible="{Binding RepeatWeekly}">
+                            <Picker Title="Số tuần" ItemsSource="{Binding WeekOptions}"
+                                    SelectedIndex="{Binding WeekIndex}" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
                 <!-- Mã giảm giá -->
                 <Label Text="Mã giảm giá" Style="{StaticResource SectionLabel}" Margin="0,8,0,0" />
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">

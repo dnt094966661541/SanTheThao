@@ -50,7 +50,7 @@ public class OwnerService(HttpClient http) : IOwnerService
         {
             using var content = new ByteArrayContent(data);
             content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-            var res = await http.PostAsync($"api/owner/venues/{venueId}/image", content);
+            var res = await http.PostAsync($"api/owner/venues/{venueId}/images", content);
             if (res.IsSuccessStatusCode) return null;
             try { return await res.Content.ReadFromJsonAsync<string>() ?? "Không tải được ảnh."; }
             catch { return "Không tải được ảnh."; }
@@ -134,5 +134,36 @@ public class OwnerService(HttpClient http) : IOwnerService
     {
         var res = await http.PostAsync($"api/owner/promotions/{id}/toggle", null);
         res.EnsureSuccessStatusCode();
+    }
+    public async Task<string?> DeleteVenueImageAsync(int venueId, int imageId)
+    {
+        try
+        {
+            var res = await http.DeleteAsync($"api/owner/venues/{venueId}/images/{imageId}");
+            return res.IsSuccessStatusCode ? null : await ReadError(res);
+        }
+        catch (Exception)
+        {
+            return "Không kết nối được máy chủ.";
+        }
+    }
+
+    public async Task<string?> SetMainVenueImageAsync(int venueId, int imageId)
+    {
+        try
+        {
+            var res = await http.PostAsync($"api/owner/venues/{venueId}/images/{imageId}/main", null);
+            return res.IsSuccessStatusCode ? null : await ReadError(res);
+        }
+        catch (Exception)
+        {
+            return "Không kết nối được máy chủ.";
+        }
+    }
+
+    private static async Task<string> ReadError(HttpResponseMessage res)
+    {
+        try { return await res.Content.ReadFromJsonAsync<string>() ?? "Có lỗi xảy ra."; }
+        catch { return "Có lỗi xảy ra."; }
     }
 }

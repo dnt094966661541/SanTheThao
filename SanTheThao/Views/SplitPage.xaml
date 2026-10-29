@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             xmlns:models="clr-namespace:SanTheThao.Models"
+             x:Class="SanTheThao.Views.SplitPage"
+             x:DataType="vm:SplitViewModel"
+             Title="Chia tiền sân">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+
+            <Border Padding="14">
+                <VerticalStackLayout Spacing="3">
+                    <Label Text="{Binding Booking.VenueName}" FontAttributes="Bold" FontSize="16" />
+                    <Label Text="{Binding Booking.Date, StringFormat='📅 {0:dd/MM/yyyy}'}" Style="{StaticResource SubLabel}" />
+                    <Label Text="{Binding Booking.HoursText, StringFormat='🕒 {0}'}" Style="{StaticResource SubLabel}" />
+                    <Label Text="{Binding TotalText}" Style="{StaticResource PriceLabel}" FontSize="20" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Chưa chia: nhập thông tin -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding NoSplit}">
+                <Label Text="{Binding PeopleLabel}" FontAttributes="Bold" Margin="0,6,0,0" />
+                <Stepper Minimum="2" Maximum="20" Increment="1" Value="{Binding People}" HorizontalOptions="Start" />
+
+                <Label Text="Tên các bạn (mỗi dòng một tên, có thể bỏ trống)" FontAttributes="Bold" />
+                <Border Padding="12,4" HeightRequest="120">
+                    <Editor Text="{Binding NamesText}" Placeholder="Ví dụ:&#10;Minh&#10;Lan&#10;Hùng" />
+                </Border>
+
+                <Label Text="Ghi chú chuyển khoản (không bắt buộc)" FontAttributes="Bold" />
+                <Border Style="{StaticResource InputBox}">
+                    <Entry Text="{Binding NoteText}" Placeholder="Ví dụ: Chuyển khoản STK 0123456789 - Vietcombank" />
+                </Border>
+
+                <Label Text="{Binding ErrorText}" TextColor="{StaticResource Danger}" FontSize="13" />
+                <Button Text="Chia tiền" Command="{Binding CreateCommand}" />
+
+                <Border BackgroundColor="{StaticResource Accent}" StrokeThickness="0" Padding="12">
+                    <Label Text="Mỗi bạn trả phần làm tròn xuống nghìn đồng, bạn là người đặt sân nên gánh phần lẻ."
+                           Style="{StaticResource SubLabel}" FontSize="12" />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Đã chia: danh sách và theo dõi -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSplit}">
+                <Label Text="{Binding PaidText}" Style="{StaticResource SectionLabel}" Margin="0,6,0,0" />
+
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Members}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:SplitMemberItem">
+                            <Border Padding="12">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <VerticalStackLayout Spacing="3">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                        <Label Text="{Binding AmountText}" Style="{StaticResource PriceLabel}" />
+                                        <Border StrokeThickness="0" Padding="8,3" StrokeShape="RoundRectangle 10"
+                                                HorizontalOptions="Start" BackgroundColor="{Binding StatusBackColor}">
+                                            <Label Text="{Binding StatusText}" FontSize="11" FontAttributes="Bold"
+                                                   TextColor="{Binding StatusColor}" />
+                                        </Border>
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Text="{Binding ToggleText}"
+                                            Style="{StaticResource SmallButton}" VerticalOptions="Center"
+                                            IsVisible="{Binding CanToggle}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SplitViewModel}}, Path=TogglePaidCommand}"
+                                            CommandParameter="{Binding .}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Button Text="📤  Gửi cho nhóm" Command="{Binding ShareCommand}" Margin="0,6,0,0" />
+                <Button Text="Xóa cách chia để chia lại" Style="{StaticResource DangerButton}"
+                        IsVisible="{Binding CanDelete}" Command="{Binding DeleteCommand}" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

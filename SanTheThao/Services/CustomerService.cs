@@ -70,4 +70,6 @@ public class CustomerService(HttpClient http) : ICustomerService
 
     public async Task<OwnerApplication?> GetMyApplicationAsync() =>
         await http.GetFromJsonAsync<OwnerApplication>("api/owner-applications/mine");
+    public async Task<List<VenueImage>> GetVenueImagesAsync(int venueId) =>
+    await http.GetFromJsonAsync<List<VenueImage>>($"api/venues/{venueId}/images") ?? new();
 }

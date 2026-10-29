@@ -8,29 +8,58 @@
              Shell.NavBarIsVisible="False">
 
     <ScrollView>
-        <VerticalStackLayout Padding="28,56,28,24" Spacing="14">
+        <VerticalStackLayout Padding="28,48,28,24" Spacing="12">
 
-            <Label Text="⚽" FontSize="72" HorizontalOptions="Center" />
+            <Label Text="⚽" FontSize="64" HorizontalOptions="Center" />
             <Label Text="SânThểThao" FontSize="30" FontAttributes="Bold"
                    TextColor="{StaticResource Green}" HorizontalOptions="Center" />
             <Label Text="{Binding TitleText}" Style="{StaticResource SubLabel}" FontSize="15"
-                   HorizontalOptions="Center" Margin="0,0,0,16" />
+                   HorizontalOptions="Center" Margin="0,0,0,8" />
 
-            <Border Style="{StaticResource InputBox}" IsVisible="{Binding IsRegister}">
+            <!-- Chọn cách đăng nhập -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8" IsVisible="{Binding ShowTabs}">
+                <Button Grid.Column="0" Text="Mật khẩu" Style="{StaticResource OutlineButton}"
+                        HeightRequest="42" Command="{Binding SelectModeCommand}" CommandParameter="0">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsPasswordMode}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Green}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="1" Text="Mã OTP" Style="{StaticResource OutlineButton}"
+                        HeightRequest="42" Command="{Binding SelectModeCommand}" CommandParameter="1">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsOtpMode}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource Green}" />
+                            <Setter Property="TextColor" Value="White" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+            </Grid>
+
+            <Border Style="{StaticResource InputBox}" IsVisible="{Binding ShowNameField}">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                     <Label Text="👤" VerticalOptions="Center" />
                     <Entry Grid.Column="1" Placeholder="Họ và tên" Text="{Binding FullName}" />
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource InputBox}">
+            <Border Style="{StaticResource InputBox}" IsVisible="{Binding ShowEmailField}">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                     <Label Text="✉️" VerticalOptions="Center" />
                     <Entry Grid.Column="1" Placeholder="Email" Keyboard="Email" Text="{Binding Email}" />
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource InputBox}">
+            <Border Style="{StaticResource InputBox}" IsVisible="{Binding ShowPhoneField}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <Label Text="📱" VerticalOptions="Center" />
+                    <Entry Grid.Column="1" Placeholder="Số điện thoại" Keyboard="Telephone" Text="{Binding Phone}" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource InputBox}" IsVisible="{Binding ShowPasswordField}">
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                     <Label Text="🔒" VerticalOptions="Center" />
                     <Entry Grid.Column="1" Placeholder="Mật khẩu"
@@ -43,23 +72,29 @@
                 </Grid>
             </Border>
 
+            <!-- Chọn cách nhận mã -->
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding ShowChannel}">
+                <Label Text="Nhận mã xác thực qua" Style="{StaticResource SubLabel}" />
+                <Border Style="{StaticResource InputBox}">
+                    <Picker ItemsSource="{Binding ChannelOptions}" SelectedIndex="{Binding ChannelIndex}" />
+                </Border>
+            </VerticalStackLayout>
+
             <Label Text="{Binding ErrorText}" TextColor="{StaticResource Danger}" FontSize="13" />
 
-            <Button Text="{Binding SubmitText}"
-                    Command="{Binding SubmitCommand}"
+            <Button Text="{Binding SubmitText}" Command="{Binding SubmitCommand}"
                     IsEnabled="{Binding IsNotBusy}" />
 
             <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
                                Color="{StaticResource Green}" />
 
-            <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="12" Margin="0,8">
+            <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="12" Margin="0,4">
                 <BoxView Grid.Column="0" HeightRequest="1" Color="#E5E7EB" VerticalOptions="Center" />
                 <Label Grid.Column="1" Text="Hoặc" Style="{StaticResource SubLabel}" />
                 <BoxView Grid.Column="2" HeightRequest="1" Color="#E5E7EB" VerticalOptions="Center" />
             </Grid>
 
-            <Button Text="{Binding SwitchText}"
-                    Style="{StaticResource OutlineButton}"
+            <Button Text="{Binding SwitchText}" Style="{StaticResource OutlineButton}"
                     Command="{Binding ToggleModeCommand}" />
 
         </VerticalStackLayout>

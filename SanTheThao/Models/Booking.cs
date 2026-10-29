@@ -51,4 +51,9 @@ public class Booking
     public string? ImageUrl { get; set; }
     public bool HasImage => !string.IsNullOrWhiteSpace(ImageUrl);
     public string? FullImageUrl => HasImage ? SanTheThao.Services.ApiConfig.BaseUrl + ImageUrl : null;
+    public bool CanSplit => Status == "Đã đặt";
+    public DateTime StartTime => Date.Date.AddHours(Hours.Count == 0 ? 0 : Hours.Min());
+
+    // Mã dùng cho hẹn giờ nhắc, lấy từ mã đơn nên luôn giống nhau mỗi lần
+    public int ReminderId => BitConverter.ToInt32(Id.ToByteArray(), 0) & 0x7FFFFFFF;
 }

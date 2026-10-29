@@ -75,20 +75,24 @@
                                     <Label Text="{Binding Code, StringFormat='Mã đơn: {0}'}"
                                            Style="{StaticResource SubLabel}" FontSize="12" />
 
-                                    <HorizontalStackLayout Spacing="8" Margin="0,6,0,0">
-                                        <Button Text="Mã QR" Style="{StaticResource SmallButton}"
+                                    <FlexLayout Wrap="Wrap" Margin="0,6,0,0">
+                                        <Button Text="Mã QR" Style="{StaticResource SmallButton}" Margin="0,0,8,6"
                                                 IsVisible="{Binding CanShowQr}"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=ShowQrCommand}"
                                                 CommandParameter="{Binding .}" />
-                                        <Button Text="Đánh giá" Style="{StaticResource SmallButton}"
+                                        <Button Text="Chia tiền" Style="{StaticResource SmallButton}" Margin="0,0,8,6"
+                                                IsVisible="{Binding CanSplit}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=SplitCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Đánh giá" Style="{StaticResource SmallButton}" Margin="0,0,8,6"
                                                 IsVisible="{Binding CanReview}"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=ReviewCommand}"
                                                 CommandParameter="{Binding .}" />
-                                        <Button Text="Hủy đơn" Style="{StaticResource SmallDangerButton}"
+                                        <Button Text="Hủy đơn" Style="{StaticResource SmallDangerButton}" Margin="0,0,8,6"
                                                 IsVisible="{Binding CanCancel}"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=CancelCommand}"
                                                 CommandParameter="{Binding .}" />
-                                    </HorizontalStackLayout>
+                                    </FlexLayout>
                                 </VerticalStackLayout>
                             </Grid>
                         </Border>

@@ -111,6 +111,29 @@ namespace SanTheThao
 
             builder.Services.AddTransient<SanTheThao.Views.BookingPage>();
 
+            builder.Services.AddTransient<SanTheThao.ViewModels.OtpViewModel>();
+            builder.Services.AddTransient<SanTheThao.Views.OtpPage>();
+            builder.Services.AddSingleton<SanTheThao.Services.ICommunityService, SanTheThao.Services.CommunityService>();
+
+            builder.Services.AddTransient<SanTheThao.ViewModels.LoyaltyViewModel>();
+            builder.Services.AddTransient<SanTheThao.Views.LoyaltyPage>();
+            builder.Services.AddTransient<SanTheThao.ViewModels.RecurringViewModel>();
+            builder.Services.AddTransient<SanTheThao.Views.RecurringPage>();
+            builder.Services.AddTransient<SanTheThao.ViewModels.SplitViewModel>();
+            builder.Services.AddTransient<SanTheThao.Views.SplitPage>();
+            builder.Services.AddTransient<SanTheThao.ViewModels.MatchesViewModel>();
+            builder.Services.AddTransient<SanTheThao.Views.MatchesPage>();
+            builder.Services.AddTransient<SanTheThao.ViewModels.MatchDetailViewModel>();
+            builder.Services.AddTransient<SanTheThao.Views.MatchDetailPage>();
+            builder.Services.AddTransient<SanTheThao.ViewModels.MatchCreateViewModel>();
+            builder.Services.AddTransient<SanTheThao.Views.MatchCreatePage>();
+
+            builder.Services.AddSingleton<SanTheThao.Services.IReminderService, SanTheThao.AndroidReminderService>();
+            builder.Services.AddSingleton<SanTheThao.Services.INotificationService, SanTheThao.Services.NotificationService>();
+            builder.Services.AddTransient<SanTheThao.ViewModels.NotificationsViewModel>();
+            builder.Services.AddTransient<SanTheThao.Views.NotificationsPage>();
+            builder.Services.AddTransient<SanTheThao.ViewModels.ChatViewModel>();
+            builder.Services.AddTransient<SanTheThao.Views.ChatPage>();
             return builder.Build();
         }
     }

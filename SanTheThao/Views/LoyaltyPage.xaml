@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             xmlns:models="clr-namespace:SanTheThao.Models"
+             x:Class="SanTheThao.Views.LoyaltyPage"
+             x:DataType="vm:LoyaltyViewModel"
+             Title="Điểm thưởng">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <Border Padding="18" StrokeThickness="0" BackgroundColor="{StaticResource Green}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{Binding TierText}" TextColor="#FFE9A6" FontSize="16" FontAttributes="Bold" />
+                    <Label Text="{Binding BalanceText}" TextColor="White" FontSize="36" FontAttributes="Bold" />
+                    <Label Text="điểm có thể đổi" TextColor="#DDF2E3" FontSize="12" />
+                    <ProgressBar Progress="{Binding Progress}" ProgressColor="#FFE9A6" Margin="0,6,0,0" />
+                    <Label Text="{Binding NextText}" TextColor="#DDF2E3" FontSize="12" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{Binding PerkText}" Style="{StaticResource SubLabel}" />
+
+            <Label Text="Đổi điểm lấy mã giảm giá" Style="{StaticResource SectionLabel}" Margin="0,6,0,0" />
+            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Rewards}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:RewardItem">
+                        <Border Padding="14">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                    <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                    <Label Text="{Binding CostText}" Style="{StaticResource PriceLabel}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1" Text="Đổi" WidthRequest="80"
+                                        IsEnabled="{Binding CanAfford}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:LoyaltyViewModel}}, Path=RedeemCommand}"
+                                        CommandParameter="{Binding .}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Label Text="Lịch sử điểm" Style="{StaticResource SectionLabel}" Margin="0,10,0,0" />
+            <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding History}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:PointTx">
+                        <Border Padding="12">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{Binding Reason}" FontSize="14" />
+                                    <Label Text="{Binding DateText}" Style="{StaticResource SubLabel}" FontSize="12" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1" Text="{Binding PointsText}" FontAttributes="Bold"
+                                       FontSize="16" TextColor="{Binding PointsColor}" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

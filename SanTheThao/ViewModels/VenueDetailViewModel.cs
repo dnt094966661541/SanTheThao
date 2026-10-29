@@ -12,13 +12,19 @@ public partial class VenueDetailViewModel : ObservableObject
     private readonly IVenueService _venueService;
     private readonly IBookingService _bookingService;
     private readonly ICustomerService _customer;
+    private readonly ICommunityService _community;
     private PromoInfo? _promo;
 
-    public VenueDetailViewModel(IVenueService venueService, IBookingService bookingService, ICustomerService customer)
+    public VenueDetailViewModel(
+        IVenueService venueService,
+        IBookingService bookingService,
+        ICustomerService customer,
+        ICommunityService community)
     {
         _venueService = venueService;
         _bookingService = bookingService;
         _customer = customer;
+        _community = community;
     }
 
     public string VenueId { get; set; } = "";
@@ -28,6 +34,9 @@ public partial class VenueDetailViewModel : ObservableObject
 
     public ObservableCollection<TimeSlot> Slots { get; } = new();
     public ObservableCollection<Review> Reviews { get; } = new();
+    public ObservableCollection<VenueImage> Images { get; } = new();
+
+    public List<string> WeekOptions { get; } = new() { "4 tuần", "8 tuần", "12 tuần" };
 
     [ObservableProperty] private Venue? venue;
     [ObservableProperty] private DateTime selectedDate = DateTime.Today;
@@ -35,6 +44,9 @@ public partial class VenueDetailViewModel : ObservableObject
     [ObservableProperty] private string promoCode = "";
     [ObservableProperty] private string promoMessage = "";
     [ObservableProperty] private bool hasNoReviews = true;
+    [ObservableProperty] private bool hasImages;
+    [ObservableProperty] private bool repeatWeekly;
+    [ObservableProperty] private int weekIndex;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FavoriteText))]
@@ -50,6 +62,18 @@ public partial class VenueDetailViewModel : ObservableObject
         if (!int.TryParse(VenueId, out var id)) return;
         Venue = await _venueService.GetVenueAsync(id);
         await LoadSlotsAsync();
+
+        try
+        {
+            var imgs = await _customer.GetVenueImagesAsync(id);
+            Images.Clear();
+            foreach (var i in imgs) Images.Add(i);
+            HasImages = Images.Count > 0;
+        }
+        catch (Exception)
+        {
+            // Không tải được ảnh thì vẫn hiện ảnh nền mặc định
+        }
 
         try
         {
@@ -174,7 +198,7 @@ public partial class VenueDetailViewModel : ObservableObject
         }
 
         TotalText = discount > 0
-            ? $"{count} giờ · {subtotal - discount:N0} đ (đã giảm {discount:N0} đ)"
+            ? $"{count} giờ · {(subtotal - discount):N0} đ (đã giảm {discount:N0} đ)"
             : $"{count} giờ · {subtotal:N0} đ";
     }
 
@@ -185,6 +209,25 @@ public partial class VenueDetailViewModel : ObservableObject
         if (chosen.Count == 0 || Venue == null)
         {
             await Shell.Current.DisplayAlertAsync("Chưa chọn giờ", "Bạn hãy chọn ít nhất một khung giờ.", "OK");
+            return;
+        }
+
+        if (RepeatWeekly)
+        {
+            var weeks = new[] { 4, 8, 12 }[Math.Clamp(WeekIndex, 0, 2)];
+            var (err, res) = await _community.CreateRecurringAsync(
+                Venue.Id, SelectedDate.Date, chosen.Select(s => s.Hour).ToList(), weeks);
+            if (err != null)
+            {
+                await Shell.Current.DisplayAlertAsync("Không đặt được", err, "OK");
+                await LoadSlotsAsync();
+                return;
+            }
+            var skippedText = res!.Skipped.Count == 0 ? "" : "\nBỏ qua: " + string.Join(", ", res.Skipped);
+            await Shell.Current.DisplayAlertAsync("Đặt sân cố định thành công",
+                $"{Venue.Name}\n{res.Created} buổi, tổng {res.Total:N0} đ{skippedText}\n" +
+                "Mã giảm giá không áp dụng cho đặt cố định.", "OK");
+            await Shell.Current.GoToAsync("//HistoryPage");
             return;
         }
 
@@ -215,5 +258,22 @@ public partial class VenueDetailViewModel : ObservableObject
             "OK");
 
         await Shell.Current.GoToAsync("//HistoryPage");
+    }
+
+    // Mở Google Maps tìm đúng địa chỉ của sân (không cần khóa bản đồ)
+    [RelayCommand]
+    private async Task OpenDirectionsAsync()
+    {
+        if (Venue == null) return;
+        var query = Uri.EscapeDataString($"{Venue.Name}, {Venue.Address}, {Venue.District}");
+        try
+        {
+            await Launcher.Default.OpenAsync(new Uri($"https://www.google.com/maps/search/?api=1&query={query}"));
+        }
+        catch (Exception)
+        {
+            await Shell.Current.DisplayAlertAsync("Không mở được bản đồ",
+                "Máy chưa có ứng dụng bản đồ hoặc trình duyệt.", "OK");
+        }
     }
 }

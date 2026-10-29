@@ -1,14 +1,17 @@
-﻿using System.Globalization;
-using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SanTheThao.Api.Data;
-using System.Text.RegularExpressions;
 using SanTheThao.Api.Models;
+using System.Globalization;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
+using static SanTheThao.Api.Models.Promotion;
 
 namespace SanTheThao.Api.Endpoints;
 
 public static class OwnerEndpoints
 {
+    private const int MaxImagesPerVenue = 10;
+
     public static void MapOwnerEndpoints(this WebApplication app)
     {
         // Chỉ Chủ sân và Admin mới gọi được các đường dẫn bên dưới
@@ -54,12 +57,14 @@ public static class OwnerEndpoints
             return Results.Ok(v);
         });
 
-        // Tải ảnh sân lên. Ảnh gửi thẳng trong nội dung yêu cầu (không dùng form).
-        g.MapPost("/venues/{id:int}/image", async (int id, HttpRequest request, ClaimsPrincipal me,
-                                                   AppDbContext db, IWebHostEnvironment env) =>
+        // ----- Quản lý ảnh sân -----
+        g.MapPost("/venues/{id:int}/images", async (int id, HttpRequest request, ClaimsPrincipal me,
+                                                    AppDbContext db, IWebHostEnvironment env) =>
         {
             var v = await OwnVenues(me, db).FirstOrDefaultAsync(x => x.Id == id);
             if (v is null) return Results.NotFound();
+            if (await db.VenueImages.CountAsync(i => i.VenueId == id) >= MaxImagesPerVenue)
+                return Results.BadRequest($"Mỗi sân chỉ có tối đa {MaxImagesPerVenue} ảnh.");
             const int maxBytes = 10 * 1024 * 1024;
             if (request.ContentLength > maxBytes)
                 return Results.BadRequest("Ảnh quá lớn, tối đa 10 MB.");
@@ -80,15 +85,46 @@ public static class OwnerEndpoints
             Directory.CreateDirectory(dir);
             var fileName = $"venue-{v.Id}-{Guid.NewGuid():N}{ext}";
             await File.WriteAllBytesAsync(Path.Combine(dir, fileName), data);
-            // Xóa ảnh cũ của sân này (nếu có)
-            if (!string.IsNullOrEmpty(v.ImageUrl))
-            {
-                var old = Path.Combine(dir, Path.GetFileName(v.ImageUrl));
-                if (File.Exists(old)) File.Delete(old);
-            }
-            v.ImageUrl = "/uploads/" + fileName;
+            var img = new VenueImage { VenueId = id, Url = "/uploads/" + fileName };
+            db.VenueImages.Add(img);
+            // Ảnh đầu tiên của sân tự thành ảnh chính
+            if (string.IsNullOrEmpty(v.ImageUrl)) v.ImageUrl = img.Url;
             await db.SaveChangesAsync();
-            return Results.Ok(v);
+            return Results.Ok(new VenueImageDto(img.Id, img.Url, v.ImageUrl == img.Url));
+        });
+
+        g.MapDelete("/venues/{id:int}/images/{imageId:int}", async (int id, int imageId, ClaimsPrincipal me,
+                                                                    AppDbContext db, IWebHostEnvironment env) =>
+        {
+            var v = await OwnVenues(me, db).FirstOrDefaultAsync(x => x.Id == id);
+            if (v is null) return Results.NotFound();
+            var img = await db.VenueImages.FirstOrDefaultAsync(i => i.Id == imageId && i.VenueId == id);
+            if (img is null) return Results.NotFound();
+            var path = Path.Combine(env.ContentRootPath, "uploads", Path.GetFileName(img.Url));
+            if (File.Exists(path)) File.Delete(path);
+            db.VenueImages.Remove(img);
+            // Xóa đúng ảnh chính thì lấy ảnh còn lại đầu tiên làm ảnh chính
+            if (v.ImageUrl == img.Url)
+            {
+                v.ImageUrl = await db.VenueImages
+                    .Where(i => i.VenueId == id && i.Id != imageId)
+                    .OrderBy(i => i.Id)
+                    .Select(i => i.Url)
+                    .FirstOrDefaultAsync();
+            }
+            await db.SaveChangesAsync();
+            return Results.Ok();
+        });
+
+        g.MapPost("/venues/{id:int}/images/{imageId:int}/main", async (int id, int imageId, ClaimsPrincipal me, AppDbContext db) =>
+        {
+            var v = await OwnVenues(me, db).FirstOrDefaultAsync(x => x.Id == id);
+            if (v is null) return Results.NotFound();
+            var img = await db.VenueImages.FirstOrDefaultAsync(i => i.Id == imageId && i.VenueId == id);
+            if (img is null) return Results.NotFound();
+            v.ImageUrl = img.Url;
+            await db.SaveChangesAsync();
+            return Results.Ok();
         });
 
         // ----- Đơn đặt của các sân tôi sở hữu -----
@@ -109,7 +145,7 @@ public static class OwnerEndpoints
         {
             var today = DateTime.Today;
             var first = DateTime.TryParseExact(month + "-01", "yyyy-MM-dd",
-                            CultureInfo.InvariantCulture, DateTimeStyles.None, out var d)
+                                CultureInfo.InvariantCulture, DateTimeStyles.None, out var d)
                         ? d
                         : new DateTime(today.Year, today.Month, 1);
             var next = first.AddMonths(1);
@@ -273,7 +309,7 @@ public static class OwnerEndpoints
         if (d.Length > 3 && d[0] == 0xFF && d[1] == 0xD8 && d[2] == 0xFF) return ".jpg";
         if (d.Length > 8 && d[0] == 0x89 && d[1] == 0x50 && d[2] == 0x4E && d[3] == 0x47) return ".png";
         if (d.Length > 12 && d[0] == 'R' && d[1] == 'I' && d[2] == 'F' && d[3] == 'F'
-                          && d[8] == 'W' && d[9] == 'E' && d[10] == 'B' && d[11] == 'P') return ".webp";
+                            && d[8] == 'W' && d[9] == 'E' && d[10] == 'B' && d[11] == 'P') return ".webp";
         return null;
     }
 

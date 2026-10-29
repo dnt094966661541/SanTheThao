@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             xmlns:models="clr-namespace:SanTheThao.Models"
+             x:Class="SanTheThao.Views.MatchesPage"
+             x:DataType="vm:MatchesViewModel"
+             Title="Ghép kèo">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16,12,16,0" RowSpacing="10">
+
+        <Button Grid.Row="0" Text="➕  Đăng kèo tìm người chơi" Command="{Binding CreateCommand}" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <ScrollView Grid.Column="0" Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Chips}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:SportChip">
+                            <Border Padding="14,8" StrokeShape="RoundRectangle 20"
+                                    BackgroundColor="{StaticResource CardWhite}">
+                                <Label Text="{Binding Name}" FontSize="14">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="TextColor" Value="White" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Green}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MatchesViewModel}}, Path=SelectSportCommand}"
+                                        CommandParameter="{Binding Name}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
+            </ScrollView>
+            <Label Grid.Column="1" Text="Của tôi" VerticalOptions="Center" />
+            <Switch Grid.Column="2" IsToggled="{Binding OnlyMine}" OnColor="{StaticResource Green}" />
+        </Grid>
+
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <CollectionView ItemsSource="{Binding Matches}">
+                <CollectionView.EmptyView>
+                    <Label Text="Chưa có kèo nào. Bấm &quot;Đăng kèo&quot; để tìm người chơi cùng."
+                           Style="{StaticResource SubLabel}" HorizontalTextAlignment="Center" Margin="0,40" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:MatchItem">
+                        <Border Margin="0,0,0,12" Padding="14">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Label Text="{Binding SportIcon}" FontSize="34" VerticalOptions="Start" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="16" />
+                                        <Border Grid.Column="1" StrokeThickness="0" Padding="8,3"
+                                                StrokeShape="RoundRectangle 10"
+                                                BackgroundColor="{Binding StatusBackColor}">
+                                            <Label Text="{Binding Status}" FontSize="11" FontAttributes="Bold"
+                                                   TextColor="{Binding StatusColor}" />
+                                        </Border>
+                                    </Grid>
+                                    <Label Text="{Binding TimeText, StringFormat='🕒 {0}'}" />
+                                    <Label Text="{Binding PlaceText, StringFormat='📍 {0}'}" Style="{StaticResource SubLabel}" />
+                                    <Label Text="{Binding Level, StringFormat='Trình độ: {0}'}" Style="{StaticResource SubLabel}" />
+                                    <Label Text="{Binding CostText}" Style="{StaticResource PriceLabel}" />
+                                    <Label Text="{Binding CountText}" Style="{StaticResource SubLabel}" FontSize="12" />
+                                    <Label Text="{Binding RoleText}" TextColor="{StaticResource Green}"
+                                           FontAttributes="Bold" FontSize="12" IsVisible="{Binding HasRole}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MatchesViewModel}}, Path=OpenCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

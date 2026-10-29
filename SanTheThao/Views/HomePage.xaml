@@ -13,7 +13,23 @@
         <!-- Thanh xanh phía trên -->
         <Grid Grid.Row="0" BackgroundColor="{StaticResource Green}"
               Padding="16,24,16,16" RowDefinitions="Auto,Auto" RowSpacing="12">
-            <Label Text="{Binding GreetingText}" TextColor="White" FontSize="22" FontAttributes="Bold" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="{Binding GreetingText}" TextColor="White" FontSize="22"
+                       FontAttributes="Bold" VerticalOptions="Center" />
+
+                <Grid Grid.Column="1" WidthRequest="44" HeightRequest="44">
+                    <Label Text="🔔" FontSize="26" HorizontalOptions="Center" VerticalOptions="Center" />
+                    <Border IsVisible="{Binding HasUnread}" BackgroundColor="#EF4444" StrokeThickness="0"
+                            Padding="5,1" StrokeShape="RoundRectangle 10" MinimumWidthRequest="18"
+                            HorizontalOptions="End" VerticalOptions="Start">
+                        <Label Text="{Binding BadgeText}" TextColor="White" FontSize="11"
+                               FontAttributes="Bold" HorizontalOptions="Center" />
+                    </Border>
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenNotificationsCommand}" />
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Grid>
             <Border Grid.Row="1" Style="{StaticResource InputBox}">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                     <Label Text="🔍" VerticalOptions="Center" />

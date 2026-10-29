@@ -13,8 +13,8 @@
         <ScrollView Grid.Row="0">
             <VerticalStackLayout Spacing="0">
 
-                <!-- Ảnh đại diện (Gradient + Ảnh sân) -->
-                <Grid HeightRequest="200">
+                <!-- Ảnh đại diện (Gradient + CarouselView ảnh sân) -->
+                <Grid HeightRequest="220">
                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 0">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -25,8 +25,18 @@
                         <Label Text="{Binding Venue.Icon}" FontSize="84"
                                HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
-                    <Image Source="{Binding Venue.FullImageUrl}" Aspect="AspectFill"
-                           IsVisible="{Binding Venue.HasImage}" />
+                    <CarouselView ItemsSource="{Binding Images}" IsVisible="{Binding HasImages}"
+                                  Loop="False" HeightRequest="220"
+                                  IndicatorView="{x:Reference Dots}">
+                        <CarouselView.ItemTemplate>
+                            <DataTemplate x:DataType="models:VenueImage">
+                                <Image Source="{Binding FullUrl}" Aspect="AspectFill" />
+                            </DataTemplate>
+                        </CarouselView.ItemTemplate>
+                    </CarouselView>
+                    <IndicatorView x:Name="Dots" IsVisible="{Binding HasImages}"
+                                   HorizontalOptions="Center" VerticalOptions="End" Margin="0,0,0,10"
+                                   IndicatorColor="#80FFFFFF" SelectedIndicatorColor="White" />
                 </Grid>
 
                 <VerticalStackLayout Padding="16" Spacing="12">
@@ -55,6 +65,9 @@
                             </MultiBinding>
                         </Label.Text>
                     </Label>
+
+                    <Button Text="📍 Chỉ đường bằng Google Maps" Style="{StaticResource SmallButton}"
+                            HorizontalOptions="Start" Command="{Binding OpenDirectionsCommand}" />
 
                     <!-- Bảng giá -->
                     <Label Text="Bảng giá" Style="{StaticResource SectionLabel}" Margin="0,8,0,0" />

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             xmlns:models="clr-namespace:SanTheThao.Models"
+             x:Class="SanTheThao.Views.RecurringPage"
+             x:DataType="vm:RecurringViewModel"
+             Title="Đặt sân cố định">
+
+    <CollectionView ItemsSource="{Binding Items}" Margin="16,12,16,0">
+        <CollectionView.EmptyView>
+            <Label Text="Bạn chưa có lịch cố định nào. Ở trang Đặt sân, bật công tắc &quot;Lặp lại hằng tuần&quot;."
+                   Style="{StaticResource SubLabel}" HorizontalTextAlignment="Center" Margin="0,40" />
+        </CollectionView.EmptyView>
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="models:RecurringItem">
+                <Border Margin="0,0,0,12" Padding="14">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Label Text="{Binding Icon}" FontSize="34" VerticalOptions="Start" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="3">
+                            <Label Text="{Binding VenueName}" FontAttributes="Bold" FontSize="16" />
+                            <Label Text="{Binding Summary}" />
+                            <Label Text="{Binding StartText}" Style="{StaticResource SubLabel}" />
+                            <Label Text="{Binding CountText}" Style="{StaticResource SubLabel}" FontSize="12" />
+                            <Button Text="Hủy các buổi sắp tới" Style="{StaticResource SmallDangerButton}"
+                                    HorizontalOptions="Start" Margin="0,6,0,0"
+                                    IsVisible="{Binding CanCancel}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringViewModel}}, Path=CancelCommand}"
+                                    CommandParameter="{Binding .}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentPage>

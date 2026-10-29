@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             x:Class="SanTheThao.Views.MatchCreatePage"
+             x:DataType="vm:MatchCreateViewModel"
+             Title="Đăng kèo">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="6">
+
+            <Label Text="Môn thể thao" FontAttributes="Bold" />
+            <Border Style="{StaticResource InputBox}">
+                <Picker ItemsSource="{Binding Sports}" SelectedItem="{Binding Sport}" />
+            </Border>
+
+            <Label Text="Sân" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Picker ItemsSource="{Binding VenueNames}" SelectedIndex="{Binding VenueIndex}" />
+            </Border>
+
+            <Label Text="Ngày chơi" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <DatePicker Date="{Binding Date}" MinimumDate="{Binding MinDate}"
+                            MaximumDate="{Binding MaxDate}" Format="dd/MM/yyyy" />
+            </Border>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,8,0,0">
+                <VerticalStackLayout Grid.Column="0" Spacing="6">
+                    <Label Text="Từ giờ" FontAttributes="Bold" />
+                    <Border Style="{StaticResource InputBox}">
+                        <Picker ItemsSource="{Binding Hours}" SelectedIndex="{Binding StartIndex}" />
+                    </Border>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                    <Label Text="Đến giờ" FontAttributes="Bold" />
+                    <Border Style="{StaticResource InputBox}">
+                        <Picker ItemsSource="{Binding Hours}" SelectedIndex="{Binding EndIndex}" />
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label Text="{Binding PlayersLabel}" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Stepper Minimum="1" Maximum="20" Increment="1" Value="{Binding Players}" HorizontalOptions="Start" />
+
+            <Label Text="Trình độ" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Picker ItemsSource="{Binding Levels}" SelectedItem="{Binding Level}" />
+            </Border>
+
+            <Label Text="Chi phí mỗi người (đồng, 0 = thỏa thuận)" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Style="{StaticResource InputBox}">
+                <Entry Text="{Binding CostText}" Keyboard="Numeric" />
+            </Border>
+
+            <Label Text="Ghi chú" FontAttributes="Bold" Margin="0,8,0,0" />
+            <Border Padding="12,4" HeightRequest="100">
+                <Editor Text="{Binding Note}" Placeholder="Ví dụ: Chơi vui là chính, mang vợt riêng..." />
+            </Border>
+
+            <Label Text="{Binding ErrorText}" TextColor="{StaticResource Danger}" FontSize="13" />
+
+            <Button Text="Đăng kèo" Command="{Binding SaveCommand}" Margin="0,8,0,16" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

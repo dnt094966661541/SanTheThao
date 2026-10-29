@@ -1,14 +1,16 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using SanTheThao.Api.Data;
-using SanTheThao.Api.Models;
 using SanTheThao.Api.Endpoints;
-using Microsoft.Extensions.FileProviders;
+using SanTheThao.Api.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using static SanTheThao.Api.Models.Promotion;
+using SanTheThao.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +59,10 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IPasswordHasher<AppUser>,
     PasswordHasher<AppUser>>();
 
+builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+builder.Services.AddSingleton<ISmsSender, SimulatedSmsSender>();
+builder.Services.AddScoped<OtpService>();
+
 var app = builder.Build();
 
 var uploadsDir = Path.Combine(builder.Environment.ContentRootPath, "uploads");
@@ -78,6 +84,14 @@ using (var scope = app.Services.CreateScope())
 
     // Chạy các migration để cập nhật cấu trúc database.
     db.Database.Migrate();
+
+    // Đưa ảnh cũ (một ảnh mỗi sân từ bước trước) vào bảng ảnh mới
+    foreach (var v in db.Venues.Where(v => v.ImageUrl != null).ToList())
+    {
+        if (!db.VenueImages.Any(i => i.VenueId == v.Id && i.Url == v.ImageUrl))
+            db.VenueImages.Add(new VenueImage { VenueId = v.Id, Url = v.ImageUrl! });
+    }
+    db.SaveChanges();
 
     var hasher = scope.ServiceProvider
         .GetRequiredService<IPasswordHasher<AppUser>>();
@@ -123,6 +137,14 @@ using (var scope = app.Services.CreateScope())
     }
 
     db.SaveChanges();
+
+    // Tài khoản tạo từ trước bước này (chưa có số điện thoại) coi như đã xác minh
+    foreach (var u in db.Users.Where(u => !u.IsVerified && u.Phone == null).ToList())
+        u.IsVerified = true;
+    db.SaveChanges();
+
+    // Dọn thông báo cũ trên 60 ngày
+    db.Notifications.Where(n => n.CreatedAt < DateTime.Now.AddDays(-60)).ExecuteDelete();
 }
 
 app.UseAuthentication();
@@ -169,42 +191,6 @@ Guid? UserIdOf(ClaimsPrincipal p) =>
         : null;
 
 // ---------- Tài khoản ----------
-app.MapPost("/api/auth/register", async (
-    RegisterRequest req,
-    AppDbContext db,
-    IPasswordHasher<AppUser> hasher) =>
-{
-    var name = (req.FullName ?? "").Trim();
-    var email = (req.Email ?? "").Trim().ToLowerInvariant();
-    var password = req.Password ?? "";
-
-    if (name == "")
-        return Results.BadRequest("Bạn chưa nhập họ tên.");
-
-    if (!email.Contains('@'))
-        return Results.BadRequest("Email không hợp lệ.");
-
-    if (password.Length < 6)
-        return Results.BadRequest("Mật khẩu cần ít nhất 6 ký tự.");
-
-    if (await db.Users.AnyAsync(u => u.Email == email))
-        return Results.Conflict("Email này đã được đăng ký.");
-
-    var user = new AppUser
-    {
-        FullName = name,
-        Email = email,
-        Role = "Customer"
-    };
-
-    user.PasswordHash = hasher.HashPassword(user, password);
-
-    db.Users.Add(user);
-    await db.SaveChangesAsync();
-
-    return Results.Ok(MakeAuth(user));
-});
-
 app.MapPost("/api/auth/login", async (
     LoginRequest req,
     AppDbContext db,
@@ -225,6 +211,9 @@ app.MapPost("/api/auth/login", async (
 
     if (user.IsLocked)
         return Results.Json("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.", statusCode: 403);
+
+    if (!user.IsVerified)
+        return Results.Json("Tài khoản chưa xác minh. Bạn hãy nhập mã xác minh để tiếp tục.", statusCode: 403);
 
     return Results.Ok(MakeAuth(user));
 });
@@ -369,6 +358,14 @@ app.MapPost("/api/bookings", async (
 
     db.Bookings.Add(booking);
 
+    if (venue.OwnerId != null)
+    {
+        var who = me.FindFirst("name")?.Value ?? "Một khách";
+        var hoursText = string.Join(", ", hours.Select(h => $"{h:00}h-{h + 1:00}h"));
+        Notify.Add(db, venue.OwnerId.Value, "booking", "Có đơn đặt mới",
+            $"{who} đặt {venue.Name} ngày {booking.Date:dd/MM/yyyy}, {hoursText}.");
+    }
+
     try
     {
         await db.SaveChangesAsync();
@@ -414,6 +411,23 @@ app.MapPost("/api/bookings/{id:guid}/cancel", async (
         return Results.BadRequest("Đơn này không hủy được.");
 
     b.Status = "Đã hủy";
+
+    var code = b.Id.ToString("N")[..8].ToUpper();
+    if (b.UserId != uid)
+    {
+        // Chủ sân hoặc quản trị viên hủy: báo cho khách
+        Notify.Add(db, b.UserId, "booking", "Đơn đặt sân đã bị hủy",
+            $"Đơn {code} tại {b.Venue?.Name} ngày {b.Date:dd/MM/yyyy} đã được chủ sân hoặc quản trị viên hủy.");
+    }
+    else if (b.Venue?.OwnerId != null && b.Venue.OwnerId != uid)
+    {
+        // Khách hủy: báo cho chủ sân
+        Notify.Add(db, b.Venue.OwnerId.Value, "booking", "Khách đã hủy đơn",
+            $"Đơn {code} tại {b.Venue.Name} ngày {b.Date:dd/MM/yyyy} đã bị khách hủy.");
+    }
+
+    if (b.CheckedInAt != null || BookingTime.EndOf(b) <= DateTime.Now)
+        return Results.BadRequest("Đơn đã qua giờ chơi hoặc đã check-in nên không hủy được.");
 
     db.BookingSlots.RemoveRange(b.Slots);
 
@@ -469,8 +483,15 @@ app.MapAdminEndpoints();
 
 // ---------- API dành cho chủ sân ----------
 app.MapOwnerEndpoints();
+app.MapNotificationEndpoints();
 
 // ---------- API dành cho khách hàng ----------
 app.MapCustomerEndpoints();
+
+app.MapAuthEndpoints(MakeAuth);
+app.MapLoyaltyEndpoints();
+app.MapRecurringEndpoints();
+app.MapSplitEndpoints();
+app.MapMatchEndpoints();
 
 app.Run();

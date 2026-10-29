@@ -21,50 +21,39 @@
         Route="LoginPage" />
 
     <TabBar>
-        <ShellContent
-            Title="Trang chủ"
-            ContentTemplate="{DataTemplate views:HomePage}"
-            Route="HomePage">
+        <ShellContent Title="Trang chủ" ContentTemplate="{DataTemplate views:HomePage}" Route="HomePage">
             <ShellContent.Icon>
                 <FontImageSource Glyph="🏠" Size="24" />
             </ShellContent.Icon>
         </ShellContent>
 
-        <ShellContent
-            Title="Lịch sử"
-            ContentTemplate="{DataTemplate views:HistoryPage}"
-            Route="HistoryPage">
+        <ShellContent Title="Ghép kèo" ContentTemplate="{DataTemplate views:MatchesPage}" Route="MatchesPage">
+            <ShellContent.Icon>
+                <FontImageSource Glyph="🤝" Size="24" />
+            </ShellContent.Icon>
+        </ShellContent>
+
+        <ShellContent Title="Lịch sử" ContentTemplate="{DataTemplate views:HistoryPage}" Route="HistoryPage">
             <ShellContent.Icon>
                 <FontImageSource Glyph="📋" Size="24" />
             </ShellContent.Icon>
         </ShellContent>
 
-        <ShellContent
-            Title="Tài khoản"
-            ContentTemplate="{DataTemplate views:ProfilePage}"
-            Route="ProfilePage">
+        <ShellContent Title="Tài khoản" ContentTemplate="{DataTemplate views:ProfilePage}" Route="ProfilePage">
             <ShellContent.Icon>
                 <FontImageSource Glyph="👤" Size="24" />
             </ShellContent.Icon>
         </ShellContent>
 
-        <ShellContent
-            x:Name="OwnerTab"
-            Title="Quản lý"
-            IsVisible="False"
-            ContentTemplate="{DataTemplate views:OwnerHomePage}"
-            Route="OwnerHomePage">
+        <ShellContent x:Name="OwnerTab" Title="Quản lý" IsVisible="False"
+                      ContentTemplate="{DataTemplate views:OwnerHomePage}" Route="OwnerHomePage">
             <ShellContent.Icon>
                 <FontImageSource Glyph="🏟️" Size="24" />
             </ShellContent.Icon>
         </ShellContent>
 
-        <ShellContent
-            x:Name="AdminTab"
-            Title="Quản trị"
-            IsVisible="False"
-            ContentTemplate="{DataTemplate views:AdminPage}"
-            Route="AdminPage">
+        <ShellContent x:Name="AdminTab" Title="Quản trị" IsVisible="False"
+                      ContentTemplate="{DataTemplate views:AdminPage}" Route="AdminPage">
             <ShellContent.Icon>
                 <FontImageSource Glyph="🛡️" Size="24" />
             </ShellContent.Icon>

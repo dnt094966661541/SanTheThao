@@ -1,4 +1,6 @@
 ﻿using SanTheThao.Views;
+using Microsoft.Extensions.DependencyInjection;
+using SanTheThao.Services;
 
 namespace SanTheThao
 {
@@ -8,6 +10,7 @@ namespace SanTheThao
         {
             InitializeComponent();
             Routing.RegisterRoute("VenueDetail", typeof(VenueDetailPage));
+            Routing.RegisterRoute("BookSlot", typeof(BookingPage));
             Routing.RegisterRoute("VenueEdit", typeof(VenueEditPage));
             Routing.RegisterRoute("OwnerBookings", typeof(OwnerBookingsPage));
             Routing.RegisterRoute("Revenue", typeof(RevenuePage));
@@ -18,14 +21,27 @@ namespace SanTheThao
             Routing.RegisterRoute("ScanCheckIn", typeof(ScanCheckInPage));
             Routing.RegisterRoute("OwnerApply", typeof(OwnerApplyPage));
             Routing.RegisterRoute("AdminApplications", typeof(AdminApplicationsPage));
-            Routing.RegisterRoute("BookSlot", typeof(BookingPage));
+            Routing.RegisterRoute("Otp", typeof(OtpPage));
+
+            Routing.RegisterRoute("Loyalty", typeof(LoyaltyPage));
+            Routing.RegisterRoute("Recurring", typeof(RecurringPage));
+            Routing.RegisterRoute("Split", typeof(SplitPage));
+            Routing.RegisterRoute("MatchDetail", typeof(MatchDetailPage));
+            Routing.RegisterRoute("MatchCreate", typeof(MatchCreatePage));
+            Routing.RegisterRoute("Notifications", typeof(NotificationsPage));
+            Routing.RegisterRoute("MatchChat", typeof(ChatPage));
         }
 
-        // Chủ sân và Admin thấy tab Quản lý, chỉ Admin thấy tab Quản trị
+        // Chủ sân thấy tab Quản lý, quản trị viên thấy tab Quản trị
+        // (mỗi vai trò chỉ có tối đa 5 tab để vừa thanh tab của Android)
         public void ApplyRole(string? role)
         {
-            OwnerTab.IsVisible = role is "Owner" or "Admin";
-            AdminTab.IsVisible = role is "Admin";
+            OwnerTab.IsVisible = role == "Owner";
+            AdminTab.IsVisible = role == "Admin";
+
+            var notifications = Handler?.MauiContext?.Services.GetService<INotificationService>();
+            if (role == null) notifications?.StopPolling();
+            else notifications?.StartPolling();
         }
     }
 }

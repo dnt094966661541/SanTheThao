@@ -11,13 +11,21 @@ public partial class HomeViewModel : ObservableObject
     private readonly IVenueService _venueService;
     private readonly ICustomerService _customer;
     private readonly IAuthService _auth;
+    private readonly INotificationService _notifications; // Chỗ 1: Thêm dịch vụ thông báo
     private List<Venue> _allVenues = new();
 
-    public HomeViewModel(IVenueService venueService, ICustomerService customer, IAuthService auth)
+    // Chỗ 2: Cập nhật hàm tạo để tiêm INotificationService và đăng ký sự kiện
+    public HomeViewModel(
+        IVenueService venueService,
+        ICustomerService customer,
+        IAuthService auth,
+        INotificationService notifications)
     {
         _venueService = venueService;
         _customer = customer;
         _auth = auth;
+        _notifications = notifications;
+        _notifications.UnreadChanged += () => MainThread.BeginInvokeOnMainThread(RefreshBadge);
     }
 
     public List<SportChip> Chips { get; } = new()
@@ -44,6 +52,20 @@ public partial class HomeViewModel : ObservableObject
     [ObservableProperty] private bool onlyFavorites;
     [ObservableProperty] private bool isRefreshing;
 
+    // Chỗ 3: Thêm các thuộc tính và phương thức xử lý Badge thông báo
+    [ObservableProperty] private bool hasUnread;
+    [ObservableProperty] private string badgeText = "";
+
+    private void RefreshBadge()
+    {
+        var n = _notifications.UnreadCount;
+        HasUnread = n > 0;
+        BadgeText = n > 9 ? "9+" : n.ToString();
+    }
+
+    [RelayCommand]
+    private Task OpenNotificationsAsync() => Shell.Current.GoToAsync("Notifications");
+
     partial void OnSearchTextChanged(string value) => ApplyFilter();
     partial void OnSelectedSortChanged(string value) => ApplyFilter();
     partial void OnOnlyFavoritesChanged(bool value) => ApplyFilter();
@@ -61,6 +83,10 @@ public partial class HomeViewModel : ObservableObject
         var full = _auth.CurrentUser?.FullName ?? "";
         var last = full.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
         GreetingText = string.IsNullOrEmpty(last) ? "Xin chào 👋" : $"Xin chào, {last} 👋";
+
+        // Chỗ 4: Cập nhật gọi hàm làm mới badge và đồng bộ nhắc nhở ngay sau lời chào
+        RefreshBadge();
+        _ = _notifications.SyncRemindersAsync();
 
         try
         {

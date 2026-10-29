@@ -152,6 +152,24 @@ public static class CustomerEndpoints
             return new OwnerApplicationDto(a.Id, a.BusinessName, a.Phone, a.Address, a.Note,
                 a.Status, a.AdminNote, a.CreatedAt, "", "");
         }).RequireAuthorization();
+
+        // Tất cả ảnh của một sân, ảnh chính xếp đầu
+        app.MapGet("/api/venues/{id:int}/images", async (int id, AppDbContext db) =>
+        {
+            var mainUrl = await db.Venues.AsNoTracking()
+                .Where(v => v.Id == id)
+                .Select(v => v.ImageUrl)
+                .FirstOrDefaultAsync();
+            var list = await db.VenueImages.AsNoTracking()
+                .Where(i => i.VenueId == id)
+                .OrderBy(i => i.Id)
+                .ToListAsync();
+            return list
+                .OrderByDescending(i => i.Url == mainUrl)
+                .ThenBy(i => i.Id)
+                .Select(i => new VenueImageDto(i.Id, i.Url, i.Url == mainUrl))
+                .ToList();
+        });
     }
 
     private static Guid? UserIdOf(ClaimsPrincipal p) =>

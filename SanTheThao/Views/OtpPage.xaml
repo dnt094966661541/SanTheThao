@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             x:Class="SanTheThao.Views.OtpPage"
+             x:DataType="vm:OtpViewModel"
+             Title="Xác thực">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="14">
+
+            <Label Text="Nhập mã xác thực"
+                   Style="{StaticResource TitleLabel}"
+                   HorizontalOptions="Center" />
+
+            <Label Text="{Binding InfoText}"
+                   Style="{StaticResource SubLabel}"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Chỉ hiển thị trong chế độ OTP giả lập -->
+            <Border IsVisible="{Binding HasDevMessage}"
+                    Padding="14"
+                    BackgroundColor="#FEF3D7"
+                    Stroke="#F2C94C">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="📩 Tin nhắn giả lập"
+                           FontAttributes="Bold"
+                           TextColor="#8A6100" />
+
+                    <Label Text="{Binding DevMessage}"
+                           FontSize="14" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource InputBox}"
+                    HeightRequest="64">
+                <Entry Text="{Binding Code}"
+                       Placeholder="------"
+                       Keyboard="Numeric"
+                       MaxLength="6"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       CharacterSpacing="8" />
+            </Border>
+
+            <Label Text="{Binding ErrorText}"
+                   TextColor="{StaticResource Danger}"
+                   FontSize="13"
+                   HorizontalTextAlignment="Center" />
+
+            <Button Text="Xác nhận"
+                    Command="{Binding VerifyCommand}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource Green}" />
+
+            <Button Text="{Binding ResendText}"
+                    Style="{StaticResource OutlineButton}"
+                    Command="{Binding ResendCommand}"
+                    IsEnabled="{Binding CanResend}" />
+
+            <Button Text="{Binding OtherChannelText}"
+                    Style="{StaticResource SmallButton}"
+                    HorizontalOptions="Center"
+                    Command="{Binding SwitchChannelCommand}"
+                    IsEnabled="{Binding CanResend}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

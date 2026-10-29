@@ -19,7 +19,6 @@ public class Venue
 
     public double Rating { get; set; }
     public int ReviewCount { get; set; }
-
     public string? ImageUrl { get; set; }              // đường dẫn ảnh, ví dụ /uploads/venue-1-abc.jpg
 }
 
@@ -40,6 +39,7 @@ public class Booking
     public decimal DiscountAmount { get; set; }
     public DateTime? CheckedInAt { get; set; }
     public bool Reviewed { get; set; }
+    public Guid? RecurringId { get; set; }
 }
 
 // Mỗi dòng = một giờ của một sân trong một ngày. Dùng để khóa giờ, chống đặt trùng.
@@ -61,6 +61,8 @@ public class AppUser
     public string Role { get; set; } = "Customer";   // Customer, Owner, Admin
     public bool IsLocked { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public string? Phone { get; set; }
+    public bool IsVerified { get; set; }
 }
 public class Review
 {
@@ -107,5 +109,22 @@ public class Promotion
         public string? AdminNote { get; set; }               // lý do từ chối
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? ReviewedAt { get; set; }
+    }
+    public class VenueImage
+    {
+        public int Id { get; set; }
+        public int VenueId { get; set; }
+        public string Url { get; set; } = "";
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+    }
+    public class OtpCode
+    {
+        public int Id { get; set; }
+        public Guid UserId { get; set; }
+        public string CodeHash { get; set; } = "";
+        public DateTime CreatedAt { get; set; }
+        public DateTime ExpiresAt { get; set; }
+        public int Attempts { get; set; }
+        public DateTime? UsedAt { get; set; }
     }
 }

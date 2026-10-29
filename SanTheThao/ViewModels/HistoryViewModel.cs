@@ -118,4 +118,7 @@ public partial class HistoryViewModel : ObservableObject
         await Shell.Current.DisplayAlertAsync("Cảm ơn bạn", "Đánh giá của bạn đã được gửi.", "OK");
         await LoadAsync();
     }
+    [RelayCommand]
+    private Task SplitAsync(Booking booking) =>
+    Shell.Current.GoToAsync("Split", new Dictionary<string, object> { ["booking"] = booking });
 }

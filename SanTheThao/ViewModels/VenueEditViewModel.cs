@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SanTheThao.Models;
 using SanTheThao.Services;
@@ -9,9 +10,8 @@ namespace SanTheThao.ViewModels;
 public partial class VenueEditViewModel : ObservableObject
 {
     private readonly IOwnerService _owner;
-    private int _id;
+    private readonly ICustomerService _customer;
     private bool _loaded;
-    private FileResult? _picked;
 
     private static readonly Dictionary<string, string> Icons = new()
     {
@@ -22,22 +22,26 @@ public partial class VenueEditViewModel : ObservableObject
         ["Bóng rổ"] = "🏀"
     };
 
-    public VenueEditViewModel(IOwnerService owner)
+    public VenueEditViewModel(IOwnerService owner, ICustomerService customer)
     {
         _owner = owner;
+        _customer = customer;
     }
 
     public string VenueId { get; set; } = "0";
     public List<string> Sports { get; } = Icons.Keys.ToList();
+    public ObservableCollection<VenueImage> Images { get; } = new();
 
-    public bool HasPhoto => PhotoSource != null;
-    public bool HasNoPhoto => PhotoSource == null;
-
+    // Mã sân trong cơ sở dữ liệu. Bằng 0 nghĩa là sân mới, chưa lưu.
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasPhoto))]
-    [NotifyPropertyChangedFor(nameof(HasNoPhoto))]
-    private ImageSource? photoSource;
+    [NotifyPropertyChangedFor(nameof(HasGallery))]
+    [NotifyPropertyChangedFor(nameof(ShowGalleryHint))]
+    private int venueDbId;
 
+    public bool HasGallery => VenueDbId > 0;
+    public bool ShowGalleryHint => VenueDbId == 0;
+
+    [ObservableProperty] private string photoCountText = "";
     [ObservableProperty] private string pageTitle = "Thêm sân";
     [ObservableProperty] private string name = "";
     [ObservableProperty] private string sport = "Cầu lông";
@@ -56,15 +60,17 @@ public partial class VenueEditViewModel : ObservableObject
         if (_loaded) return;
         _loaded = true;
 
-        int.TryParse(VenueId, out _id);
-        if (_id == 0)
+        int.TryParse(VenueId, out var id);
+        VenueDbId = id;
+
+        if (id == 0)
         {
             PageTitle = "Thêm sân";
             return;
         }
 
         PageTitle = "Sửa sân";
-        var v = (await _owner.GetVenuesAsync()).FirstOrDefault(x => x.Id == _id);
+        var v = (await _owner.GetVenuesAsync()).FirstOrDefault(x => x.Id == id);
         if (v == null) return;
 
         Name = v.Name;
@@ -77,26 +83,89 @@ public partial class VenueEditViewModel : ObservableObject
         PeakEndText = v.PeakEndHour.ToString();
         WeekendPriceText = v.WeekendPricePerHour.ToString("0");
 
-        if (v.FullImageUrl != null)
-            PhotoSource = ImageSource.FromUri(new Uri(v.FullImageUrl));
+        await LoadImagesAsync();
+    }
+
+    private async Task LoadImagesAsync()
+    {
+        try
+        {
+            var list = await _customer.GetVenueImagesAsync(VenueDbId);
+            Images.Clear();
+            foreach (var i in list) Images.Add(i);
+        }
+        catch (Exception)
+        {
+            // Không tải được ảnh thì để trống, các phần khác vẫn dùng được
+        }
+        PhotoCountText = $"Đã có {Images.Count}/10 ảnh";
     }
 
     [RelayCommand]
-    private async Task PickPhotoAsync()
+    private async Task AddPhotoAsync()
     {
         try
         {
             var file = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions { Title = "Chọn ảnh sân" });
             if (file == null) return;
 
-            _picked = file;
-            PhotoSource = ImageSource.FromFile(file.FullPath);
-            ErrorText = "";
+            await using var stream = await file.OpenReadAsync();
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+
+            if (ms.Length > 10 * 1024 * 1024)
+            {
+                await Shell.Current.DisplayAlertAsync("Ảnh quá lớn", "Mỗi ảnh tối đa 10 MB.", "OK");
+                return;
+            }
+
+            var type = Path.GetExtension(file.FileName).ToLowerInvariant() switch
+            {
+                ".png" => "image/png",
+                ".webp" => "image/webp",
+                _ => "image/jpeg"
+            };
+
+            var error = await _owner.UploadVenueImageAsync(VenueDbId, ms.ToArray(), type);
+            if (error != null)
+            {
+                await Shell.Current.DisplayAlertAsync("Chưa tải được ảnh", error, "OK");
+                return;
+            }
+
+            await LoadImagesAsync();
         }
         catch (Exception)
         {
-            ErrorText = "Không mở được thư viện ảnh.";
+            await Shell.Current.DisplayAlertAsync("Lỗi", "Không mở được thư viện ảnh.", "OK");
         }
+    }
+
+    [RelayCommand]
+    private async Task SetMainAsync(VenueImage image)
+    {
+        var error = await _owner.SetMainVenueImageAsync(VenueDbId, image.Id);
+        if (error != null)
+        {
+            await Shell.Current.DisplayAlertAsync("Chưa đổi được", error, "OK");
+            return;
+        }
+        await LoadImagesAsync();
+    }
+
+    [RelayCommand]
+    private async Task RemoveImageAsync(VenueImage image)
+    {
+        var yes = await Shell.Current.DisplayAlertAsync("Xóa ảnh", "Bạn muốn xóa ảnh này?", "Xóa", "Không");
+        if (!yes) return;
+
+        var error = await _owner.DeleteVenueImageAsync(VenueDbId, image.Id);
+        if (error != null)
+        {
+            await Shell.Current.DisplayAlertAsync("Chưa xóa được", error, "OK");
+            return;
+        }
+        await LoadImagesAsync();
     }
 
     // Chấp nhận cả "80000", "80.000" và "80,000"
@@ -104,25 +173,6 @@ public partial class VenueEditViewModel : ObservableObject
     {
         var digits = new string((text ?? "").Where(char.IsDigit).ToArray());
         return decimal.TryParse(digits, out number);
-    }
-
-    private async Task<string?> UploadPhotoAsync(int venueId)
-    {
-        await using var stream = await _picked!.OpenReadAsync();
-        using var ms = new MemoryStream();
-        await stream.CopyToAsync(ms);
-
-        if (ms.Length > 10 * 1024 * 1024)
-            return "Ảnh quá lớn, tối đa 10 MB.";
-
-        var type = Path.GetExtension(_picked.FileName).ToLowerInvariant() switch
-        {
-            ".png" => "image/png",
-            ".webp" => "image/webp",
-            _ => "image/jpeg"
-        };
-
-        return await _owner.UploadVenueImageAsync(venueId, ms.ToArray(), type);
     }
 
     [RelayCommand]
@@ -151,7 +201,7 @@ public partial class VenueEditViewModel : ObservableObject
 
         var venue = new Venue
         {
-            Id = _id,
+            Id = VenueDbId,
             Name = Name.Trim(),
             Sport = Sport,
             Icon = Icons.GetValueOrDefault(Sport, "🏟️"),
@@ -164,6 +214,7 @@ public partial class VenueEditViewModel : ObservableObject
             WeekendPricePerHour = weekendPrice
         };
 
+        var isNew = VenueDbId == 0;
         var (error, savedId) = await _owner.SaveVenueAsync(venue);
         if (error != null)
         {
@@ -171,14 +222,15 @@ public partial class VenueEditViewModel : ObservableObject
             return;
         }
 
-        if (_picked != null)
+        if (isNew)
         {
-            var uploadError = await UploadPhotoAsync(savedId);
-            if (uploadError != null)
-            {
-                await Shell.Current.DisplayAlertAsync("Đã lưu sân nhưng chưa tải được ảnh",
-                    uploadError + "\nBạn mở lại mục Sửa sân để chọn ảnh lần nữa.", "OK");
-            }
+            // Sân mới: ở lại trang này để chủ sân thêm ảnh
+            VenueDbId = savedId;
+            PageTitle = "Sửa sân";
+            await LoadImagesAsync();
+            await Shell.Current.DisplayAlertAsync("Đã tạo sân",
+                "Bạn có thể thêm ảnh cho sân ở phần Ảnh sân bên dưới. Xong thì bấm nút quay lại.", "OK");
+            return;
         }
 
         await Shell.Current.GoToAsync("..");

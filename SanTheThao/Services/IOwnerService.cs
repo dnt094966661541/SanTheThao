@@ -14,4 +14,6 @@ public interface IOwnerService
     Task<string?> CreatePromotionAsync(Promotion promo);   // null = thành công, ngược lại là nội dung lỗi
     Task TogglePromotionAsync(int id);
     Task<string?> UploadVenueImageAsync(int venueId, byte[] data, string contentType);
+    Task<string?> DeleteVenueImageAsync(int venueId, int imageId);
+    Task<string?> SetMainVenueImageAsync(int venueId, int imageId);
 }

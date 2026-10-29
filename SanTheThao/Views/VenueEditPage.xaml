@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             xmlns:models="clr-namespace:SanTheThao.Models"
              x:Class="SanTheThao.Views.VenueEditPage"
              x:DataType="vm:VenueEditViewModel"
              Title="{Binding PageTitle}">
@@ -10,18 +11,47 @@
         <VerticalStackLayout Padding="16" Spacing="6">
 
             <Label Text="Ảnh sân" Style="{StaticResource SectionLabel}" />
-            <Border HeightRequest="180" Padding="0" StrokeShape="RoundRectangle 14"
-                    BackgroundColor="{StaticResource Accent}">
-                <Grid>
-                    <VerticalStackLayout VerticalOptions="Center" Spacing="6" IsVisible="{Binding HasNoPhoto}">
-                        <Label Text="📷" FontSize="40" HorizontalOptions="Center" />
-                        <Label Text="Chưa có ảnh" Style="{StaticResource SubLabel}" HorizontalOptions="Center" />
-                    </VerticalStackLayout>
-                    <Image Source="{Binding PhotoSource}" Aspect="AspectFill" IsVisible="{Binding HasPhoto}" />
-                </Grid>
+            <Border BackgroundColor="{StaticResource Accent}" StrokeThickness="0" Padding="14"
+                    IsVisible="{Binding ShowGalleryHint}">
+                <Label Text="Bạn lưu thông tin sân trước, sau đó sẽ thêm được ảnh ở đây."
+                       Style="{StaticResource SubLabel}" />
             </Border>
-            <Button Text="Chọn ảnh từ thư viện" Style="{StaticResource OutlineButton}"
-                    Command="{Binding PickPhotoCommand}" Margin="0,4,0,12" />
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasGallery}">
+                <Label Text="Ảnh chính hiện ở Trang chủ. Các ảnh còn lại khách xem ở trang Chi tiết sân."
+                       Style="{StaticResource SubLabel}" />
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Images}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:VenueImage">
+                            <Border Padding="8">
+                                <Grid ColumnDefinitions="120,*" ColumnSpacing="12">
+                                    <Border HeightRequest="84" Padding="0" StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 10">
+                                        <Image Source="{Binding FullUrl}" Aspect="AspectFill" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                                        <Border Style="{StaticResource Badge}" IsVisible="{Binding IsMain}">
+                                            <Label Text="Ảnh chính" FontSize="11" FontAttributes="Bold"
+                                                   TextColor="{StaticResource Green}" />
+                                        </Border>
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Button Text="Đặt làm ảnh chính" Style="{StaticResource SmallButton}"
+                                                    IsVisible="{Binding CanSetMain}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:VenueEditViewModel}}, Path=SetMainCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            <Button Text="Xóa" Style="{StaticResource SmallDangerButton}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:VenueEditViewModel}}, Path=RemoveImageCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+                <Label Text="{Binding PhotoCountText}" Style="{StaticResource SubLabel}" />
+                <Button Text="➕  Thêm ảnh" Style="{StaticResource OutlineButton}"
+                        Command="{Binding AddPhotoCommand}" Margin="0,0,0,12" />
+            </VerticalStackLayout>
 
             <Label Text="Thông tin sân" Style="{StaticResource SectionLabel}" />
 

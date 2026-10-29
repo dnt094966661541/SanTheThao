@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SanTheThao.ViewModels"
+             xmlns:models="clr-namespace:SanTheThao.Models"
+             x:Class="SanTheThao.Views.MatchDetailPage"
+             x:DataType="vm:MatchDetailViewModel"
+             Title="Chi tiết kèo">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+
+            <Border Padding="16">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding Match.Title}" Style="{StaticResource TitleLabel}" />
+                    <Label Text="{Binding Match.TimeText, StringFormat='🕒 {0}'}" FontSize="15" />
+                    <Label Text="{Binding Match.PlaceText, StringFormat='📍 {0}'}" />
+                    <Label Text="{Binding Match.Level, StringFormat='Trình độ: {0}'}" Style="{StaticResource SubLabel}" />
+                    <Label Text="{Binding Match.CostText}" Style="{StaticResource PriceLabel}" FontSize="18" />
+                    <Label Text="{Binding Match.CountText}" Style="{StaticResource SubLabel}" />
+                    <Label Text="{Binding Match.HostText}" Style="{StaticResource SubLabel}" />
+                    <Label Text="{Binding Match.Note}" Margin="0,6,0,0" IsVisible="{Binding Match.HasNote}" />
+                    <Label Text="{Binding Match.RoleText}" TextColor="{StaticResource Green}" FontAttributes="Bold"
+                           IsVisible="{Binding Match.HasRole}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Liên hệ chủ kèo: chỉ hiện sau khi được nhận -->
+            <Border Padding="14" IsVisible="{Binding HasHostPhone}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Liên hệ chủ kèo" FontAttributes="Bold" />
+                    <Label Text="{Binding HostPhone, StringFormat='📞 {0}'}" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Gọi" Style="{StaticResource SmallButton}"
+                                Command="{Binding CallCommand}" CommandParameter="{Binding HostPhone}" />
+                        <Button Text="Zalo" Style="{StaticResource SmallButton}"
+                                Command="{Binding ZaloCommand}" CommandParameter="{Binding HostPhone}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Nút nhắn tin nhóm và chú thích trạng thái -->
+            <Button Text="💬  Nhắn tin nhóm" Command="{Binding OpenChatCommand}" IsVisible="{Binding CanChat}" />
+            <Label Text="Sau khi chủ kèo nhận bạn, bạn sẽ nhắn tin được với cả nhóm."
+                   Style="{StaticResource SubLabel}" HorizontalTextAlignment="Center"
+                   IsVisible="{Binding ShowChatHint}" />
+
+            <Button Text="Xin tham gia" Command="{Binding JoinCommand}" IsVisible="{Binding CanJoin}" />
+            <Button Text="Rút khỏi kèo" Style="{StaticResource DangerButton}"
+                    Command="{Binding LeaveCommand}" IsVisible="{Binding CanLeave}" />
+
+            <!-- Danh sách người xin tham gia -->
+            <Label Text="Người tham gia" Style="{StaticResource SectionLabel}" Margin="0,8,0,0"
+                   IsVisible="{Binding HasJoins}" />
+            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Joins}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:MatchJoinItem">
+                        <Border Padding="12">
+                            <VerticalStackLayout Spacing="3">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label Text="{Binding NameText}" FontAttributes="Bold" />
+                                    <Border Grid.Column="1" StrokeThickness="0" Padding="8,3"
+                                            StrokeShape="RoundRectangle 10" BackgroundColor="{Binding StatusBackColor}">
+                                        <Label Text="{Binding Status}" FontSize="11" FontAttributes="Bold"
+                                               TextColor="{Binding StatusColor}" />
+                                    </Border>
+                                </Grid>
+                                <Label Text="{Binding Message}" Style="{StaticResource SubLabel}"
+                                       IsVisible="{Binding HasMessage}" />
+                                <Label Text="{Binding PhoneText}" IsVisible="{Binding HasPhone}" />
+                                <HorizontalStackLayout Spacing="8" Margin="0,4,0,0">
+                                    <Button Text="Nhận" Style="{StaticResource SmallButton}"
+                                            IsVisible="{Binding CanReview}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MatchDetailViewModel}}, Path=ApproveCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    <Button Text="Từ chối" Style="{StaticResource SmallDangerButton}"
+                                            IsVisible="{Binding CanReview}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MatchDetailViewModel}}, Path=RejectCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    <Button Text="Gọi" Style="{StaticResource SmallButton}"
+                                            IsVisible="{Binding HasPhone}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MatchDetailViewModel}}, Path=CallCommand}"
+                                            CommandParameter="{Binding Phone}" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Button Text="Đóng kèo" Style="{StaticResource DangerButton}" Margin="0,10,0,16"
+                    Command="{Binding CloseCommand}" IsVisible="{Binding CanClose}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
